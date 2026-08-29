@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useStore } from '../store/useStore';
@@ -12,7 +12,15 @@ import OrganizerDashboard from '../screens/Organizer/OrganizerDashboard';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
-  const { user } = useStore();
+  const { user, initSession, subscribeRealtime } = useStore();
+
+  useEffect(() => {
+    initSession();
+    const unsubscribe = subscribeRealtime();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   return (
     <NavigationContainer>

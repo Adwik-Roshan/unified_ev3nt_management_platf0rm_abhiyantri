@@ -37,24 +37,32 @@ const TeamsRoute = () => {
   const teams = useStore(state => state.teams);
   return (
     <ScrollView style={styles.scene}>
-      <Text variant="titleMedium" style={{ marginBottom: 10 }}>Looking for members</Text>
-      {teams.filter(t => t.lookingForMembers).map(t => (
-        <List.Item
-          key={t.id}
-          title={t.name}
-          description={`${t.members.length} members`}
-          left={props => <List.Icon {...props} icon="account-group" />}
-          right={props => <Button mode="contained-tonal" onPress={() => alert('Request sent!')} style={{ alignSelf: 'center' }}>Join</Button>}
-        />
+      <Text variant="headlineSmall" style={{ marginBottom: 5, fontWeight: 'bold' }}>Team Discovery</Text>
+      <Text style={{ color: '#666', marginBottom: 20 }}>Find your squad and join forces.</Text>
+
+      <Text variant="titleMedium" style={{ marginBottom: 10, color: '#6200ee', fontWeight: 'bold' }}>Looking for members</Text>
+      {teams.filter(t => t.looking_for_members).map(t => (
+        <Card key={t.id} style={styles.teamCard}>
+          <Card.Title 
+            title={t.name} 
+            subtitle={`${t.members_count} member(s)`} 
+            left={props => <Avatar.Icon {...props} icon="account-group" style={{ backgroundColor: '#03dac6' }} />}
+          />
+          <Card.Actions>
+            <Button mode="contained" onPress={() => alert('Request sent to join team!')}>Join Team</Button>
+          </Card.Actions>
+        </Card>
       ))}
-      <Text variant="titleMedium" style={{ marginTop: 20, marginBottom: 10 }}>All Teams</Text>
-      {teams.filter(t => !t.lookingForMembers).map(t => (
-        <List.Item
-          key={t.id}
-          title={t.name}
-          description={`${t.members.length} members`}
-          left={props => <List.Icon {...props} icon="check-circle" />}
-        />
+
+      <Text variant="titleMedium" style={{ marginTop: 20, marginBottom: 10, fontWeight: 'bold' }}>All Teams</Text>
+      {teams.filter(t => !t.looking_for_members).map(t => (
+        <Card key={t.id} style={styles.teamCardClosed}>
+          <Card.Title 
+            title={t.name} 
+            subtitle={`${t.members_count} member(s)`} 
+            left={props => <Avatar.Icon {...props} icon="check-circle" style={{ backgroundColor: '#e0e0e0' }} />}
+          />
+        </Card>
       ))}
     </ScrollView>
   );
@@ -71,15 +79,39 @@ const LeaderboardRoute = () => {
     return { ...sub, total_score: total };
   }).sort((a, b) => b.total_score - a.total_score);
 
+  const getTrophyColor = (index) => {
+    if (index === 0) return '#FFD700'; // Gold
+    if (index === 1) return '#C0C0C0'; // Silver
+    if (index === 2) return '#CD7F32'; // Bronze
+    return '#e0e0e0';
+  };
+
   return (
     <ScrollView style={styles.scene}>
+      <Text variant="headlineSmall" style={{ marginBottom: 5, fontWeight: 'bold' }}>Live Leaderboard</Text>
+      <Text style={{ color: '#666', marginBottom: 20 }}>Real-time rankings based on judge evaluations.</Text>
+
       {leaderboard.map((item, index) => (
-        <List.Item
-          key={item.id}
-          title={`${index + 1}. ${item.project_name}`}
-          description={`Score: ${item.total_score}`}
-          left={props => <Avatar.Text size={40} label={item.project_name.substring(0, 2)} style={{marginRight: 10}} />}
-        />
+        <Card key={item.id} style={[styles.card, { borderColor: index < 3 ? getTrophyColor(index) : 'transparent', borderWidth: index < 3 ? 2 : 0 }]}>
+          <List.Item
+            title={`${index + 1}. ${item.project_name}`}
+            titleStyle={{ fontWeight: index < 3 ? 'bold' : 'normal', fontSize: index < 3 ? 18 : 16 }}
+            description={`Total Score: ${item.total_score} pts`}
+            left={props => (
+              <Avatar.Icon 
+                {...props} 
+                icon={index < 3 ? "trophy" : "medal"} 
+                style={{ backgroundColor: getTrophyColor(index), marginRight: 10 }} 
+                color={index < 3 ? '#000' : '#666'}
+              />
+            )}
+            right={props => (
+              <View style={{ justifyContent: 'center' }}>
+                <Text variant="titleLarge" style={{ fontWeight: 'bold', color: '#6200ee' }}>{item.total_score}</Text>
+              </View>
+            )}
+          />
+        </Card>
       ))}
     </ScrollView>
   );
@@ -120,9 +152,11 @@ export default function ParticipantDashboard() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  scene: { flex: 1, padding: 15 },
+  container: { flex: 1, backgroundColor: '#f8f9fa' },
+  scene: { flex: 1, padding: 20 },
   center: { justifyContent: 'center', alignItems: 'center' },
-  card: { marginBottom: 15 },
-  qrContainer: { padding: 20, backgroundColor: '#fff', elevation: 4, borderRadius: 10 }
+  card: { marginBottom: 15, backgroundColor: '#fff', borderRadius: 12, elevation: 2 },
+  teamCard: { marginBottom: 15, backgroundColor: '#fff', borderRadius: 12, elevation: 3, borderLeftWidth: 5, borderLeftColor: '#03dac6' },
+  teamCardClosed: { marginBottom: 15, backgroundColor: '#f0f0f0', borderRadius: 12, elevation: 1 },
+  qrContainer: { padding: 20, backgroundColor: '#fff', elevation: 4, borderRadius: 16, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } }
 });
